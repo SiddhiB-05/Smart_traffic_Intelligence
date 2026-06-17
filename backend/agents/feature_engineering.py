@@ -1,7 +1,7 @@
 """
 feature_engineering.py
 ----------------------
-ML Engineer 1 deliverable — Data Pipeline & Feature Engineering
+ML Engineer 1 deliverable â€” Data Pipeline & Feature Engineering
 Used by prediction_agent.py at inference time.
 """
 

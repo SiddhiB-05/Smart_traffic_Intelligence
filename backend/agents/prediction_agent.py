@@ -1,6 +1,8 @@
 import os
 import logging
 import numpy as np
+import pandas as pd
+import joblib
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List
 
@@ -157,12 +159,36 @@ class PredictionAgent:
         FileNotFoundError
             If any of the required model files do not exist on disk.
         """
-        # --- Placeholder: mark as loaded so predict methods can run ---
-        logger.warning(
-            "PredictionAgent.load_models() — using PLACEHOLDER mode. "
-            "No real models loaded.  Replace this with joblib.load() calls."
-        )
+        if self._models_loaded:
+            logger.info("PredictionAgent models are already loaded.")
+            return
+
+        logger.info("Loading PredictionAgent models from disk...")
+
+        for path_name, path_val in [
+            ("classifier_path", self.classifier_path),
+            ("regressor_path", self.regressor_path),
+            ("junction_lookup_path", self.junction_lookup_path),
+            ("zone_encoder_path", self.zone_encoder_path),
+        ]:
+            if not path_val:
+                raise FileNotFoundError(f"Path for {path_name} is not configured.")
+            if not os.path.exists(path_val):
+                raise FileNotFoundError(f"Model file not found: {path_val}")
+
+        self.classifier = joblib.load(self.classifier_path)
+        self.regressor = joblib.load(self.regressor_path)
+        self.junction_recurrence = joblib.load(self.junction_lookup_path)
+        self.encoders = joblib.load(self.zone_encoder_path)
+        self.zone_encoder = self.encoders.get("zone")
+
         self._models_loaded = True
+        logger.info(
+            "PredictionAgent models loaded successfully. "
+            "Classifier: %d features expected. Regressor: %d features expected.",
+            self.classifier.n_features_in_,
+            self.regressor.n_features_in_
+        )
 
     # ------------------------------------------------------------------
     # Feature engineering
@@ -228,28 +254,30 @@ class PredictionAgent:
         9. Set ``planned_duration_minutes`` (0 if unplanned or missing).
         10. Concatenate all features into a single np.ndarray and return.
         """
-        # --- Placeholder: return a zero vector of the expected length ---
-        # Total features: 1 + 1 + 13 + 10 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 = 33
-        feature_length = (
-            1                                # event_type
-            + 1                              # corridor_rank
-            + len(EVENT_CAUSE_CATEGORIES)    # event_cause one-hot (13)
-            + len(VEHICLE_TYPE_CATEGORIES)   # veh_type one-hot (10)
-            + 1                              # requires_road_closure
-            + 1                              # hour_of_day
-            + 1                              # day_of_week
-            + 1                              # is_peak_hour
-            + 1                              # is_weekend
-            + 1                              # zone (label-encoded)
-            + 1                              # junction_recurrence
-            + 1                              # planned_duration_minutes
-        )
-        logger.debug(
-            "build_feature_vector() — returning placeholder zero-vector "
-            "of length %d",
-            feature_length,
-        )
-        return np.zeros(feature_length, dtype=np.float64)
+        rec = incident.copy()
+        corridor = rec.get("corridor")
+        if corridor is None or pd.isna(corridor):
+            corridor_rank = 0
+        else:
+            c = str(corridor).strip()
+            if c in ORR_VARIANTS:
+                corridor_rank = 1
+            elif c in {"Non-corridor", ""}:
+                corridor_rank = 0
+            else:
+                corridor_rank = 2
+        rec["corridor_rank"] = corridor_rank
+
+        from backend.agents.feature_engineering import build_feature_vector as fe_build
+        df_feats = fe_build(rec, self.encoders, self.junction_recurrence)
+
+        FEATURES = [
+            "latitude", "longitude", "requires_road_closure", "hour_of_day",
+            "day_of_week", "is_peak_hour", "is_weekend", "corridor_rank",
+            "junction_recurrence", "event_cause_enc", "veh_type_enc", "zone_enc"
+        ]
+        features_row = df_feats[FEATURES].iloc[0]
+        return features_row.to_numpy(dtype=np.float64)
 
     # ------------------------------------------------------------------
     # Individual prediction methods
@@ -281,11 +309,19 @@ class PredictionAgent:
         5. Set confidence = probability of the predicted class.
         6. Return ``{"priority": label, "confidence": confidence}``.
         """
-        # --- Placeholder: return mock High priority with 78% confidence ---
-        logger.debug("predict_priority() — returning placeholder mock values.")
+        FEATURES = [
+            "latitude", "longitude", "requires_road_closure", "hour_of_day",
+            "day_of_week", "is_peak_hour", "is_weekend", "corridor_rank",
+            "junction_recurrence", "event_cause_enc", "veh_type_enc", "zone_enc"
+        ]
+        X = pd.DataFrame([features], columns=FEATURES)
+        probs = self.classifier.predict_proba(X)[0]
+        pred_class_idx = np.argmax(probs)
+        priority_label = "High" if pred_class_idx == 1 else "Low"
+        confidence = float(probs[pred_class_idx])
         return {
-            "priority": "High",
-            "confidence": 0.78,
+            "priority": priority_label,
+            "confidence": confidence,
         }
 
     def predict_duration(self, features: np.ndarray) -> int:
@@ -310,9 +346,15 @@ class PredictionAgent:
         3. Clamp result to ``max(1, round(prediction))``.
         4. Return the integer.
         """
-        # --- Placeholder: return a mock 45-minute estimate ---
-        logger.debug("predict_duration() — returning placeholder mock value.")
-        return 45
+        FEATURES = [
+            "latitude", "longitude", "requires_road_closure", "hour_of_day",
+            "day_of_week", "is_peak_hour", "is_weekend", "corridor_rank",
+            "junction_recurrence", "event_cause_enc", "veh_type_enc", "zone_enc"
+        ]
+        X = pd.DataFrame([features], columns=FEATURES)
+        pred_log = self.regressor.predict(X)[0]
+        pred_mins = np.expm1(pred_log)
+        return max(1, int(round(float(pred_mins))))
 
     # ------------------------------------------------------------------
     # Orchestration

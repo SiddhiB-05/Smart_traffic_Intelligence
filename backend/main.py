@@ -134,10 +134,10 @@ async def startup_event() -> None:
     # ── 3. Agent 2: Prediction Agent ────────────────────────────────────────
     logger.info("Initialising Agent 2 (Prediction Agent) …")
     prediction_agent = PredictionAgent(
-        classifier_path="backend/models/priority_classifier.joblib",
-        regressor_path="backend/models/duration_regressor.joblib",
-        junction_lookup_path="backend/models/junction_recurrence.joblib",
-        zone_encoder_path="backend/models/zone_label_encoder.joblib",
+        classifier_path="backend/models/priority_model.joblib",
+        regressor_path="backend/models/duration_model.joblib",
+        junction_lookup_path="backend/models/junction_lookup.joblib",
+        zone_encoder_path="backend/models/encoders.joblib",
     )
     prediction_agent.load_models()  # logs WARNING if files absent (placeholder mode)
     init_prediction_agent(prediction_agent)

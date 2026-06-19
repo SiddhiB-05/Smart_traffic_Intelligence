@@ -1,170 +1,264 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowDown, FolderOpen, Envelope as Mail, Code as Code2, Terminal, GitBranch, Lightning as Zap, Calendar, ArrowUpRight, ArrowRight, Cpu, Database } from '@phosphor-icons/react';
+import { ArrowDown, ArrowUpRight, ArrowRight, Cpu, Database, Lightning as Zap, Calendar, Terminal, Brain, TreeStructure, ShieldCheck, ChartLineUp } from '@phosphor-icons/react';
 import ISTClock from '@/components/ISTClock';
-import { motion } from 'framer-motion';
 import { DATA } from "@/components/constants";
+import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
+
+function AnimatedCounter({ value, suffix = '' }: { value: string; suffix?: string }) {
+  const ref = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    // Extract numeric part
+    const numericStr = value.replace(/[^0-9.]/g, '');
+    const target = parseFloat(numericStr);
+    if (isNaN(target)) {
+      el.textContent = value;
+      return;
+    }
+
+    const prefix = value.match(/^[^0-9]*/)?.[0] || '';
+    const hasComma = value.includes(',');
+    const isDecimal = value.includes('.');
+
+    gsap.fromTo(el, { textContent: '0' }, {
+      textContent: target,
+      duration: 2,
+      ease: 'power2.out',
+      snap: { textContent: isDecimal ? 0.1 : 1 },
+      scrollTrigger: {
+        trigger: el,
+        start: 'top 85%',
+        once: true,
+      },
+      onUpdate: function () {
+        const current = parseFloat(el.textContent || '0');
+        if (hasComma) {
+          el.textContent = prefix + Math.round(current).toLocaleString() + suffix;
+        } else if (isDecimal) {
+          el.textContent = prefix + current.toFixed(0) + suffix;
+        } else {
+          el.textContent = prefix + Math.round(current).toString() + suffix;
+        }
+      },
+    });
+  }, [value, suffix]);
+
+  return <h3 ref={ref} className="font-black text-4xl counter-value">0</h3>;
+}
 
 export default function HomePage() {
-  const { name, summary, workExperience, projects, achievements } = DATA;
-  const featuredProjects = projects.slice(0, 4); // Show top 4 projects
+  const heroRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const benchRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Hero animation
+      gsap.from('.hero-title', {
+        y: 60,
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power3.out',
+      });
+
+      gsap.from('.hero-subtitle', {
+        y: 40,
+        opacity: 0,
+        duration: 0.6,
+        delay: 0.3,
+        ease: 'power3.out',
+      });
+
+      gsap.from('.hero-cta', {
+        y: 30,
+        opacity: 0,
+        duration: 0.5,
+        delay: 0.5,
+        stagger: 0.15,
+        ease: 'power3.out',
+      });
+
+      // Stats cards
+      gsap.from('.stat-card', {
+        scrollTrigger: {
+          trigger: statsRef.current,
+          start: 'top 80%',
+          once: true,
+        },
+        y: 40,
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.12,
+        ease: 'power2.out',
+      });
+
+      // Benchmark cards
+      gsap.from('.bench-card', {
+        scrollTrigger: {
+          trigger: benchRef.current,
+          start: 'top 80%',
+          once: true,
+        },
+        y: 40,
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.15,
+        ease: 'power2.out',
+      });
+
+      // Navigation bento cards
+      gsap.from('.nav-card', {
+        scrollTrigger: {
+          trigger: navRef.current,
+          start: 'top 80%',
+          once: true,
+        },
+        y: 30,
+        opacity: 0,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: 'power2.out',
+      });
+    });
+
+    return () => ctx.revert();
+  }, []);
 
   return (
     <div className="flex-1 w-full bg-grid">
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 py-8 lg:py-20">
+      <section ref={heroRef} className="max-w-7xl mx-auto px-4 md:px-6 py-8 lg:py-20">
         <div className="grid lg:grid-cols-12 gap-6 items-stretch">
 
-          {/* Main Hero Card - Contains everything on mobile, left side on desktop */}
+          {/* Main Hero Card */}
           <div className="lg:col-span-8 flex flex-col gap-6">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="border-3 border-neo-border bg-white p-4 sm:p-8 md:p-16 shadow-neo relative overflow-hidden h-full flex flex-col justify-center min-h-[320px] sm:min-h-[500px]"
-            >
+            <div className="border-3 border-neo-border bg-white p-4 sm:p-8 md:p-16 shadow-neo relative overflow-hidden h-full flex flex-col justify-center min-h-[320px] sm:min-h-[500px]">
               {/* Background Decoration */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-secondary rounded-full blur-3xl -mr-20 -mt-20 opacity-50"></div>
 
               {/* Mobile: Status Badge & System Icon */}
               <div className="relative mb-12 sm:mb-8">
-                <div className="inline-block px-2 py-1 sm:px-3 sm:py-1 bg-neo-text text-primary border-2 border-neo-border font-mono text-[10px] sm:text-xs font-bold uppercase tracking-widest shadow-[2px_2px_0px_0px_rgba(39,255,20,1)]">
-                  System Status: Optimal
+                <div className="inline-block px-2 py-1 sm:px-3 sm:py-1 bg-neo-text text-primary border-2 border-neo-border font-mono text-[10px] sm:text-xs font-bold uppercase tracking-widest shadow-[2px_2px_0px_0px_rgba(159,232,112,1)]">
+                  System Status: Operational
                 </div>
 
                 {/* System Icon - Absolute positioned top-right on mobile */}
                 <div className="lg:hidden absolute top-0 right-0 w-[28%] max-w-[120px] aspect-square border-3 border-neo-border overflow-hidden bg-black flex items-center justify-center">
-                  <Terminal weight="bold" className="w-1/2 h-1/2 text-primary" />
+                  <Brain weight="bold" className="w-1/2 h-1/2 text-primary" />
                 </div>
               </div>
 
-              <motion.h1 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-                className="text-2xl sm:text-4xl md:text-6xl font-black uppercase tracking-tighter leading-[0.85] mb-4 sm:mb-6 relative z-10"
-              >
-                Agentic<br />
+              <h1 className="hero-title text-2xl sm:text-4xl md:text-6xl font-black uppercase tracking-tighter leading-[0.85] mb-4 sm:mb-6 relative z-10">
+                Smart Traffic<br />
                 <span className="terminal-invert sm:terminal-invert-lg font-black inline-block">
-                  Orchestration
+                  Intelligence
                 </span><br />
-                & Recursive Logic
-              </motion.h1>
+                Bengaluru
+              </h1>
 
-              <p className="text-sm sm:text-lg md:text-xl max-w-2xl text-gray-500 font-mono leading-relaxed border-l-4 border-primary pl-3 sm:pl-6 mb-3 sm:mb-4">
-                Neo is the distributed infrastructure for autonomous multi-agent systems. We enable complex task decomposition through recursive reasoning and real-time tool execution.
+              <p className="hero-subtitle text-sm sm:text-lg md:text-xl max-w-2xl text-gray-500 font-mono leading-relaxed border-l-4 border-primary pl-3 sm:pl-6 mb-3 sm:mb-4">
+                Four autonomous AI agents transform raw traffic incident data into predictive intelligence and deployment-ready action plans — in real time.
               </p>
 
-              <p className="text-[10px] sm:text-xs font-mono text-gray-500 mb-6 sm:mb-8 uppercase tracking-widest">
-                Distributed Platform v1.0 // Turing-Grade Logic
+              <p className="hero-subtitle text-[10px] sm:text-xs font-mono text-gray-500 mb-6 sm:mb-8 uppercase tracking-widest">
+                Agentic AI Platform // 8,173 Real Incidents // Bengaluru Traffic Dataset
               </p>
 
               <div className="flex flex-col gap-3 relative z-10">
                 <Link
-                  href="/projects"
-                  className="px-5 py-3 sm:px-8 sm:py-4 bg-primary text-neo-text font-bold text-sm sm:text-lg uppercase tracking-wider btn-neo flex items-center justify-center gap-2 group w-full"
+                  href="/dashboard"
+                  className="hero-cta px-5 py-3 sm:px-8 sm:py-4 bg-primary text-neo-text font-bold text-sm sm:text-lg uppercase tracking-wider btn-neo flex items-center justify-center gap-2 group w-full"
                 >
-                  <motion.span whileHover={{ scale: 1.05 }} className="flex items-center gap-2">
-                    Explore Agent Gallery
-                    <ArrowDown weight="bold" className="w-5 h-5 sm:w-6 sm:h-6" />
-                  </motion.span>
+                  <span className="flex items-center gap-2">
+                    Launch Dashboard
+                    <ArrowRight weight="bold" className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </span>
                 </Link>
-                <a
-                  href={DATA.contact.links.find(l => l.name === 'Demo')?.url || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-5 py-3 sm:px-8 sm:py-4 bg-white text-neo-text font-bold text-sm sm:text-lg uppercase tracking-wider btn-neo transition-all flex items-center justify-center gap-2 w-full"
+                <Link
+                  href="/projects"
+                  className="hero-cta px-5 py-3 sm:px-8 sm:py-4 bg-white text-neo-text font-bold text-sm sm:text-lg uppercase tracking-wider btn-neo transition-all flex items-center justify-center gap-2 w-full"
                 >
-                  Request Platform Demo
-                  <ArrowUpRight weight="bold" className="w-5 h-5 sm:w-6 sm:h-6" />
-                </a>
+                  Explore Agentic Workflow
+                  <ArrowDown weight="bold" className="w-5 h-5 sm:w-6 sm:h-6" />
+                </Link>
               </div>
-            </motion.div>
+            </div>
           </div>
 
-          {/* Right Column Grid - Hidden on mobile, visible on desktop */}
+          {/* Right Column Grid */}
           <div className="hidden lg:flex lg:col-span-4 flex-col gap-6">
-            {/* Platform Graphic Card - Desktop only */}
-            <motion.div 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
-              className="border-3 border-neo-border bg-black p-0 shadow-neo flex-1 min-h-[300px] flex flex-col items-center justify-center relative group overflow-hidden"
-            >
+            {/* Platform Graphic Card */}
+            <div className="border-3 border-neo-border bg-black p-0 shadow-neo flex-1 min-h-[300px] flex flex-col items-center justify-center relative group overflow-hidden">
               <div className="absolute inset-0 opacity-20 pointer-events-none">
                 <div className="absolute inset-0 bg-center"></div>
               </div>
-              <Terminal weight="bold" className="w-32 h-32 text-primary animate-pulse relative z-10" />
+              <Brain weight="bold" className="w-32 h-32 text-primary animate-pulse relative z-10" />
               <div className="absolute bottom-4 left-4 font-mono text-[10px] text-primary/50 uppercase tracking-widest z-10">
-                Neo_Core_Systems // Auth_Secure
+                4_Agent_Pipeline // Active
               </div>
               <div className="absolute inset-0 border-3 border-transparent group-hover:border-primary transition-all duration-300 pointer-events-none"></div>
-            </motion.div>
+            </div>
 
-            {/* Stats Grid - Desktop only */}
-            <div className="grid grid-cols-2 gap-6 h-auto">
-              <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-                className="border-3 border-neo-border bg-white p-5 shadow-neo flex flex-col justify-between hover:bg-secondary transition-colors"
-              >
+            {/* Stats Grid */}
+            <div ref={statsRef} className="grid grid-cols-2 gap-6 h-auto">
+              <div className="stat-card border-3 border-neo-border bg-white p-5 shadow-neo flex flex-col justify-between hover:bg-secondary transition-colors">
                 <div className="flex justify-between items-start">
-                  <Cpu weight="bold" className="w-8 h-8" />
+                  <Database weight="bold" className="w-8 h-8" />
                   <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
                 </div>
                 <div>
-                  <h3 className="font-black text-4xl">12k+</h3>
-                  <p className="font-mono text-[10px] font-bold uppercase leading-tight mt-1">Active<br />Agent Nodes</p>
+                  <AnimatedCounter value="8,173" />
+                  <p className="font-mono text-[10px] font-bold uppercase leading-tight mt-1">Real<br />Incidents</p>
                 </div>
-              </motion.div>
-              <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4, duration: 0.5 }}
-                className="border-3 border-neo-border bg-neo-text text-primary p-5 shadow-neo flex flex-col justify-between hover:bg-gray-900 transition-colors"
-              >
-                <Zap weight="bold" className="w-8 h-8" />
+              </div>
+              <div className="stat-card border-3 border-neo-border bg-neo-text text-primary p-5 shadow-neo flex flex-col justify-between hover:bg-gray-900 transition-colors">
+                <Cpu weight="bold" className="w-8 h-8" />
                 <div>
-                  <h3 className="font-black text-4xl">99.9%</h3>
-                  <p className="font-mono text-[10px] font-bold uppercase leading-tight mt-1 text-white">Task<br />Resolution</p>
+                  <AnimatedCounter value="4" />
+                  <p className="font-mono text-[10px] font-bold uppercase leading-tight mt-1 text-white">AI<br />Agents</p>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Marquee Section - Hazard Tape Style */}
+      {/* Marquee Section - Platform Capabilities */}
       <section className="py-0 bg-primary border-y-[3px] border-neo-border relative overflow-hidden">
-        {/* Technologies Header */}
         <div className="text-center py-2 border-b-[3px] border-neo-border">
           <h3 className="text-sm font-bold tracking-widest uppercase inline-block">Platform Capabilities</h3>
         </div>
         <div className="w-full overflow-hidden py-6">
           <div className="flex w-max animate-marquee">
-            {/* Repeat content to ensure seamless loop */}
             {[...Array(2)].map((_, i) => (
               <div key={i} className="flex items-center gap-20 px-10">
                 <div className="md:text-4xl text-2xl font-black text-neo-text tracking-tight uppercase">
-                  Autonomous Orchestration
+                  Real-time Anomaly Detection
                 </div>
                 <div className="md:text-4xl text-2xl font-black text-neo-text tracking-tight uppercase">
-                  Recursive Reasoning
+                  XGBoost Classification
                 </div>
                 <div className="md:text-4xl text-2xl font-black text-neo-text tracking-tight uppercase">
-                  Multi-Agent Sync
+                  Multilingual NLP Parsing
                 </div>
                 <div className="md:text-4xl text-2xl font-black text-neo-text tracking-tight uppercase">
-                  Tool Integration
+                  Gemini Action Plans
                 </div>
                 <div className="md:text-4xl text-2xl font-black text-neo-text tracking-tight uppercase">
-                  Distributed Memory
+                  Isolation Forest
                 </div>
                 <div className="md:text-4xl text-2xl font-black text-neo-text tracking-tight uppercase">
-                  Secure Execution
+                  SSE Streaming
                 </div>
               </div>
             ))}
@@ -172,238 +266,184 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Battle Tested - Achievements Carousel */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 py-12">
+      {/* Key Results Section */}
+      <section ref={benchRef} className="max-w-7xl mx-auto px-4 md:px-6 py-12">
         <div className="flex items-center gap-4 mb-8">
           <div className="h-8 w-8 bg-neo-text flex items-center justify-center text-primary">
-            <Zap weight="bold" className="w-5 h-5" />
+            <ChartLineUp weight="bold" className="w-5 h-5" />
           </div>
-          <h2 className="text-3xl font-black uppercase tracking-tight">System Benchmarks</h2>
+          <h2 className="text-3xl font-black uppercase tracking-tight">Key Results</h2>
           <div className="h-1 flex-1 bg-neo-text"></div>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Milestone 1 */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, amount: 0.5 }}
-            transition={{ duration: 0.5 }}
-            className="border-3 border-neo-border neo-brutal-box bg-white shadow-neo overflow-hidden group"
-          >
+          {/* Result 1 */}
+          <div className="bench-card border-3 border-neo-border neo-brutal-box bg-white shadow-neo overflow-hidden group">
             <div className="aspect-video overflow-hidden border-b-3 border-neo-border relative bg-black flex items-center justify-center">
-              <Code2 weight="bold" className="w-32 h-32 text-primary opacity-20 group-hover:opacity-40 transition-opacity" />
-              <div className="absolute inset-0 pattern-diagonal opacity-10"></div>
-            </div>
-            <div className="p-6">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="bg-primary text-neo-text text-xs font-bold px-2 py-1 border-2 border-neo-border uppercase">Certified</span>
-                <span className="terminal-invert text-xs font-bold uppercase">Turing-Grade</span>
-              </div>
-              <h3 className="text-xl font-black uppercase tracking-tight mb-2">Reasoning Protocol</h3>
-              <p className="font-mono text-sm text-gray-600">Recursive Task Decomposition Benchmark</p>
-            </div>
-          </motion.div>
-
-          {/* Milestone 2 */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, amount: 0.5 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="border-3 border-neo-border neo-brutal-box bg-white shadow-neo overflow-hidden group"
-          >
-            <div className="aspect-video overflow-hidden border-b-3 border-neo-border relative bg-black flex items-center justify-center">
-              <Database weight="bold" className="w-32 h-32 text-primary opacity-20 group-hover:opacity-40 transition-opacity" />
+              <Brain weight="bold" className="w-32 h-32 text-primary opacity-20 group-hover:opacity-40 transition-opacity" />
               <div className="absolute inset-0 pattern-diagonal opacity-10"></div>
             </div>
             <div className="p-6">
               <div className="flex items-center gap-2 mb-2">
                 <span className="bg-primary text-neo-text text-xs font-bold px-2 py-1 border-2 border-neo-border uppercase">Validated</span>
-                <span className="terminal-invert text-xs font-bold uppercase">Scalable_v2</span>
+                <span className="terminal-invert text-xs font-bold uppercase">Real Data</span>
               </div>
-              <h3 className="text-xl font-black uppercase tracking-tight mb-2">Distributed Memory</h3>
-              <p className="font-mono text-sm text-gray-600">Cross-Agent Knowledge Synchronization</p>
+              <h3 className="text-xl font-black uppercase tracking-tight mb-2">8,173 Real Incidents</h3>
+              <p className="font-mono text-sm text-gray-600">Trained on authenticated Bengaluru traffic data — vehicle breakdowns, accidents, VIP movements, festivals, and protests.</p>
             </div>
-          </motion.div>
+          </div>
+
+          {/* Result 2 */}
+          <div className="bench-card border-3 border-neo-border neo-brutal-box bg-white shadow-neo overflow-hidden group">
+            <div className="aspect-video overflow-hidden border-b-3 border-neo-border relative bg-black flex items-center justify-center">
+              <TreeStructure weight="bold" className="w-32 h-32 text-primary opacity-20 group-hover:opacity-40 transition-opacity" />
+              <div className="absolute inset-0 pattern-diagonal opacity-10"></div>
+            </div>
+            <div className="p-6">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="bg-primary text-neo-text text-xs font-bold px-2 py-1 border-2 border-neo-border uppercase">Agentic</span>
+                <span className="terminal-invert text-xs font-bold uppercase">End-to-End</span>
+              </div>
+              <h3 className="text-xl font-black uppercase tracking-tight mb-2">4-Agent Pipeline</h3>
+              <p className="font-mono text-sm text-gray-600">From raw Kannada text to deployment-ready field plan in under 2 seconds — NLP → Prediction → Anomaly → Action Plan.</p>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Explore More - Premium Navigation Bento Grid */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 py-12 lg:py-20">
+      <section ref={navRef} className="max-w-7xl mx-auto px-4 md:px-6 py-12 lg:py-20">
         <div className="flex items-center gap-4 mb-10">
           <div className="h-10 w-10 bg-neo-text flex items-center justify-center text-primary shadow-neo-sm">
             <ArrowDown weight="bold" className="w-6 h-6" />
           </div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight">Platform Core</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tight">Explore Platform</h2>
           <div className="h-1 flex-1 bg-neo-text"></div>
-          <span className="font-mono text-xs text-gray-500 hidden md:block">{"// SYSTEM NAV"}</span>
+          <span className="font-mono text-xs text-gray-500 hidden md:block">{"// NAVIGATION"}</span>
         </div>
 
-        {/* Asymmetric Bento Grid - Enhanced Layout */}
+        {/* Asymmetric Bento Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-4 lg:gap-5">
 
-          {/* About Card - Large Left (spans 2 cols, 2 rows) - NOW BLACK */}
+          {/* Architecture Card - Large Left */}
           <Link
             href="/about"
-            className="sm:col-span-1 md:col-span-2 md:row-span-2 relative group overflow-hidden block h-full"
+            className="nav-card sm:col-span-1 md:col-span-2 md:row-span-2 relative group overflow-hidden block h-full"
           >
-            <motion.div 
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true, amount: 0.5 }}
-              transition={{ duration: 0.4 }}
-              className="border-4 border-neo-border bg-neo-text text-white p-5 sm:p-8 shadow-[5px_5px_0px_0px_#39FF14] h-full min-h-[180px] sm:min-h-[300px] md:min-h-[420px] flex flex-col justify-between transition-all duration-300 group-hover:translate-x-[3px] group-hover:translate-y-[3px] group-hover:shadow-none relative overflow-hidden"
-            >
-              
+            <div className="border-4 border-neo-border bg-neo-text text-white p-5 sm:p-8 shadow-[5px_5px_0px_0px_#9FE870] h-full min-h-[180px] sm:min-h-[300px] md:min-h-[420px] flex flex-col justify-between transition-all duration-300 group-hover:translate-x-[3px] group-hover:translate-y-[3px] group-hover:shadow-none relative overflow-hidden">
               <div className="relative z-10">
                 <div className="flex justify-between items-start mb-3 sm:mb-6">
                   <span className="bg-primary text-neo-text px-2 py-1 font-mono text-sm font-bold">01</span>
                 </div>
                 <h3 className="text-2xl sm:text-4xl md:text-5xl font-black uppercase tracking-tighter mb-2 sm:mb-4 leading-[0.9] text-primary">
-                  The<br /><span className="text-white">Vision</span>
+                  System<br /><span className="text-white">Architecture</span>
                 </h3>
                 <p className="font-mono text-xs sm:text-base text-gray-400 leading-relaxed max-w-[200px] hidden sm:block">
-                  Autonomous agents designed to solve high-complexity logic.
+                  How the platform transforms raw data into actionable intelligence.
                 </p>
               </div>
 
               <div className="relative z-10 hidden sm:flex items-center justify-between pt-6 border-t border-gray-700">
-                <span className="font-mono text-sm tracking-wider text-gray-400 group-hover:text-primary transition-colors">Read Mission</span>
+                <span className="font-mono text-sm tracking-wider text-gray-400 group-hover:text-primary transition-colors">View Architecture</span>
                 <span className="w-10 h-10 border-2 border-primary flex items-center justify-center bg-primary text-neo-text">
                   <ArrowRight weight="bold" className="w-6 h-6" />
                 </span>
               </div>
-            </motion.div>
+            </div>
           </Link>
 
-          {/* Selected Works - Top Middle (Larger - 2.5 cols equivalent) */}
+          {/* Agents Card */}
           <Link
             href="/projects"
-            className="sm:col-span-1 md:col-span-2 relative group block h-full"
+            className="nav-card sm:col-span-1 md:col-span-2 relative group block h-full"
           >
-            <motion.div 
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true, amount: 0.5 }}
-              transition={{ delay: 0.1, duration: 0.4 }}
-              className="border-4 border-neo-border bg-primary p-4 sm:p-6 shadow-neo min-h-[180px] sm:min-h-[200px] h-full flex flex-col justify-between transition-all duration-300 group-hover:translate-x-[3px] group-hover:translate-y-[3px] group-hover:shadow-none relative overflow-hidden"
-            >
-              {/* Diagonal stripes overlay */}
+            <div className="border-4 border-neo-border bg-primary p-4 sm:p-6 shadow-neo min-h-[180px] sm:min-h-[200px] h-full flex flex-col justify-between transition-all duration-300 group-hover:translate-x-[3px] group-hover:translate-y-[3px] group-hover:shadow-none relative overflow-hidden">
               <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.1) 10px, rgba(0,0,0,0.1) 20px)' }}></div>
-
               <div className="relative z-10">
                 <div className="flex justify-between items-start mb-4">
                   <span className="bg-neo-text text-primary px-2 py-1 font-mono text-xs font-bold">02</span>
-                  <FolderOpen weight="bold" className="w-10 h-10 text-neo-text/40" />
+                  <Brain weight="bold" className="w-10 h-10 text-neo-text/40" />
                 </div>
                 <h3 className="text-xl sm:text-3xl font-black uppercase tracking-tighter leading-[0.9]">
-                  Agent<br />Gallery
+                  AI Agent<br />Workflow
                 </h3>
               </div>
               <div className="relative z-10 flex items-center justify-between pt-2 sm:pt-4">
-                <span className="font-mono text-sm text-neo-text/70">{featuredProjects.length}+ solutions</span>
+                <span className="font-mono text-sm text-neo-text/70">4 Autonomous Agents</span>
                 <ArrowUpRight weight="bold" className="w-6 h-6" />
               </div>
-            </motion.div>
+            </div>
           </Link>
 
-          {/* Book a Call CTA - Top Right (Smaller) */}
-          <a
-            href={DATA.contact.links.find(l => l.name === 'Demo')?.url || '#'}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="sm:col-span-1 md:col-span-2 relative group block h-full"
+          {/* Dashboard CTA */}
+          <Link
+            href="/dashboard"
+            className="nav-card sm:col-span-1 md:col-span-2 relative group block h-full"
           >
-            <motion.div 
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true, amount: 0.5 }}
-              transition={{ delay: 0.2, duration: 0.4 }}
-              className="border-4 border-neo-border bg-secondary p-4 sm:p-5 shadow-neo min-h-[180px] sm:min-h-[200px] h-full flex flex-col justify-between transition-all duration-300 group-hover:translate-x-[3px] group-hover:translate-y-[3px] group-hover:shadow-none relative overflow-hidden"
-            >
-              {/* Animated pulse effect on hover */}
+            <div className="border-4 border-neo-border bg-secondary p-4 sm:p-5 shadow-neo min-h-[180px] sm:min-h-[200px] h-full flex flex-col justify-between transition-all duration-300 group-hover:translate-x-[3px] group-hover:translate-y-[3px] group-hover:shadow-none relative overflow-hidden">
               <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/20 transition-colors duration-500"></div>
               <div className="absolute inset-0 pattern-diagonal opacity-5"></div>
-
               <div className="relative z-10">
                 <div className="flex justify-between items-start mb-3">
                   <span className="terminal-invert-sm font-mono uppercase">LIVE</span>
-                  <Calendar weight="bold" className="w-8 h-8 text-gray-400" />
+                  <ShieldCheck weight="bold" className="w-8 h-8 text-gray-400" />
                 </div>
                 <h3 className="text-xl sm:text-3xl font-black uppercase tracking-tighter leading-[0.95]">
-                  Request<br />Platform Demo
+                  Live<br />Dashboard
                 </h3>
               </div>
               <div className="relative z-10 font-mono text-xs text-gray-600 flex items-center gap-2">
+                <span className="w-2 h-2 bg-primary rounded-full status-active"></span>
+                Map • Incidents • Analytics
               </div>
-            </motion.div>
-          </a>
+            </div>
+          </Link>
 
-          {/* Journey Card - Bottom Middle - NOW WHITE */}
+          {/* Pipeline Card */}
           <Link
             href="/journey"
-            className="sm:col-span-1 md:col-span-2 relative group block h-full"
+            className="nav-card sm:col-span-1 md:col-span-2 relative group block h-full"
           >
-            <motion.div 
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true, amount: 0.5 }}
-              transition={{ delay: 0.3, duration: 0.4 }}
-              className="border-4 border-neo-border bg-white p-4 sm:p-6 shadow-neo min-h-[180px] sm:min-h-[200px] h-full flex flex-col justify-between transition-all duration-300 group-hover:translate-x-[3px] group-hover:translate-y-[3px] group-hover:shadow-none relative overflow-hidden"
-            >
-              {/* Subtle grid pattern */}
+            <div className="border-4 border-neo-border bg-white p-4 sm:p-6 shadow-neo min-h-[180px] sm:min-h-[200px] h-full flex flex-col justify-between transition-all duration-300 group-hover:translate-x-[3px] group-hover:translate-y-[3px] group-hover:shadow-none relative overflow-hidden">
               <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(0,0,0,0.1) 20px, rgba(0,0,0,0.1) 21px), repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(0,0,0,0.1) 20px, rgba(0,0,0,0.1) 21px)' }}></div>
-
               <div className="relative z-10">
                 <div className="flex justify-between items-start mb-4">
                   <span className="terminal-invert font-mono text-xs">03</span>
                   <Terminal weight="bold" className="w-10 h-10 text-gray-300" />
                 </div>
                 <h3 className="text-xl sm:text-3xl font-black uppercase tracking-tighter leading-[0.9]">
-                  Platform<span className="text-primary">Docs</span>
+                  Data<span className="text-primary">Pipeline</span>
                 </h3>
               </div>
               <p className="relative z-10 font-mono text-sm text-gray-500 uppercase tracking-widest">
-                Nodes • Protocols • SDK
+                Dataset • Features • Models
               </p>
-            </motion.div>
+            </div>
           </Link>
 
-          {/* IST Clock Card - Bottom Right (Larger - spanning more) - Visible on mobile now */}
-          <div className="col-span-1 md:col-span-2 relative h-full">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true, amount: 0.5 }}
-              transition={{ delay: 0.4, duration: 0.4 }}
-              className="border-4 border-neo-border bg-neo-text p-4 sm:p-5 shadow-[5px_5px_0px_0px_#39FF14] min-h-[180px] sm:min-h-[200px] h-full flex flex-col justify-between relative overflow-hidden"
-            >
-              
-
-              {/* Header */}
+          {/* IST Clock Card */}
+          <div className="nav-card col-span-1 md:col-span-2 relative h-full">
+            <div className="border-4 border-neo-border bg-neo-text p-4 sm:p-5 shadow-[5px_5px_0px_0px_#9FE870] min-h-[180px] sm:min-h-[200px] h-full flex flex-col justify-between relative overflow-hidden">
               <div className="relative z-10">
                 <p className="font-mono text-[10px] text-gray-200 uppercase tracking-widest mb-1">SYSTEM TIME • GMT+5:30 • 24H</p>
               </div>
-
-              {/* Clock */}
               <div className="relative z-10 flex-1 flex items-center justify-center">
                 <ISTClock />
               </div>
-            </motion.div>
+            </div>
           </div>
 
-          {/* Let's Build - Full Width Bottom Bar */}
+          {/* Full Width Bottom Bar */}
           <Link
-            href="/contact"
-            className="sm:col-span-2 md:col-span-6 relative group"
+            href="/dashboard"
+            className="nav-card sm:col-span-2 md:col-span-6 relative group"
           >
             <div className="border-4 border-neo-border bg-white px-4 sm:px-8 py-4 sm:py-6 shadow-neo flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all duration-300 group-hover:translate-x-[3px] group-hover:translate-y-[3px] group-hover:shadow-none group-hover:bg-primary">
               <div className="flex items-center gap-3 sm:gap-6">
-                <Cpu className="w-10 h-10 sm:w-16 sm:h-16" />
+                <Brain className="w-10 h-10 sm:w-16 sm:h-16" />
                 <div>
-                  <h3 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-tighter">Ready for Deployment</h3>
-                  <p className="font-mono text-sm text-gray-500 group-hover:text-neo-text/70 transition-colors">Start building autonomous agentic workflows on Neo today.</p>
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-black uppercase tracking-tighter">Ready to Deploy</h3>
+                  <p className="font-mono text-sm text-gray-500 group-hover:text-neo-text/70 transition-colors">Launch the live dashboard — Map, Incidents, Anomaly Monitor, and Action Plans.</p>
                 </div>
               </div>
               <div className="hidden md:flex items-center gap-4">

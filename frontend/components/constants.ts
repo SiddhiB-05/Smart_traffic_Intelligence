@@ -1,124 +1,211 @@
 import { SystemData } from '../types';
-import { GithubLogo as Github, LinkedinLogo as Linkedin, Code as Code2, InstagramLogo as Instagram, Envelope as Mail, TwitterLogo as Twitter, Calendar } from '@phosphor-icons/react/ssr';
+import { GithubLogo as Github, LinkedinLogo as Linkedin, Code as Code2, InstagramLogo as Instagram, Envelope as Mail, TwitterLogo as Twitter, Calendar, Globe } from '@phosphor-icons/react/ssr';
 
 export const DATA: SystemData = {
-  name: "Neo AI Platform",
+  name: "Smart Traffic Intelligence",
+  tagline: "Agentic AI for Bengaluru Traffic Management",
   contact: {
-    email: "ops@neo-ai.com",
-    portfolio: "https://neo-ai.com",
+    email: "team@smart-traffic.ai",
+    portfolio: "https://smart-traffic.ai",
     links: [
-      { name: "GitHub", url: "https://github.com/neo-ai", icon: Github },
-      { name: "LinkedIn", url: "https://www.linkedin.com/company/neo-ai", icon: Linkedin },
-      { name: "Twitter", url: "https://x.com/neo_ai_platform", icon: Twitter },
-      { name: "Docs", url: "https://docs.neo-ai.com", icon: Code2 },
-      { name: "Discord", url: "https://discord.gg/neo-ai", icon: Instagram },
-      { name: "Support", url: "mailto:ops@neo-ai.com", icon: Mail },
+      { name: "GitHub", url: "https://github.com/smart-traffic-intelligence", icon: Github },
+      { name: "LinkedIn", url: "https://www.linkedin.com/company/smart-traffic", icon: Linkedin },
+      { name: "Documentation", url: "#", icon: Code2 },
+      { name: "Live Demo", url: "#", icon: Globe },
       { name: "Demo", url: "https://cal.com/sugarytreat/demo", icon: Calendar },
+      { name: "Support", url: "mailto:team@smart-traffic.ai", icon: Mail },
     ],
   },
-  summary: "Neo is a next-generation agentic platform designed for autonomous orchestration. We provide the infrastructure for building, deploying, and scaling multi-agent systems that solve complex business logic through recursive reasoning and tool-integrated workflows.",
-  workExperience: [
+  summary: "Smart Traffic Intelligence is an agentic AI platform that transforms raw Bengaluru traffic incident data into predictive intelligence and actionable deployment plans. Four specialized AI agents work in concert — parsing multilingual incident descriptions, predicting severity and resolution time, detecting zone-level anomalies in real time, and generating field-ready response plans — all orchestrated through a single unified dashboard.",
+
+  systemStats: [
+    { label: "Incidents Analyzed", value: "8,173", description: "Real Bengaluru traffic records" },
+    { label: "AI Agents", value: "4", description: "Autonomous specialized agents" },
+    { label: "Median Resolution", value: "~64 min", description: "Predicted incident clearance" },
+    { label: "Training Records", value: "3,205", description: "Validated duration samples" },
+  ],
+
+  agents: [
     {
-      title: "Core Platform v1.0",
-      company: "Neo Systems",
-      place: "Global Node",
-      date: "Q1 2026 - Present",
-      description: "Laying the foundation for autonomous agentic orchestration.",
-      points: [
-        "Architected the recursive reasoning engine for multi-agent coordination.",
-        "Implemented high-concurrency tool integration layer for real-time API execution."
-      ]
+      id: "nlp-parser",
+      number: "01",
+      name: "NLP Description Parser",
+      shortName: "NLP Parser",
+      description: "Accepts raw incident descriptions in Kannada, Hindi, mixed-language, or broken English and extracts structured incident metadata using Gemini Flash with few-shot prompting.",
+      techBadges: ["Gemini Flash", "Few-Shot Prompting", "Multilingual NLP"],
+      input: "Raw text description (any language — Kannada, Hindi, English, mixed)",
+      processing: "Single Gemini Flash API call with system instructions + few-shot examples → returns structured JSON extraction",
+      output: "{ root_cause, vehicle_type, severity (1-3), action_needed, normalized_summary }",
+      details: [
+        "Handles Kannada script (e.g. 'ಬಿಎಂಟಿಸಿ ಬಸ್ ಕೆಟ್ಟು ನಿಂತಿದೆ') and transliterated text",
+        "Extracts root cause from 10 predefined categories (vehicle_breakdown, accident, etc.)",
+        "Falls back gracefully — if parsing fails, structured form fields are used instead",
+        "Output displayed in Incident Panel as 'Parsed from description' section"
+      ],
+      color: "primary"
     },
     {
-      title: "Agentic Alpha",
-      company: "Neo Research",
-      place: "Distributed",
-      date: "2025 - 2026",
-      description: "Initial research into long-context reasoning and memory management.",
-      points: [
-        "Developed proprietary RAG strategies for sub-second knowledge retrieval.",
-        "Fine-tuned character-level transformers for specialized agent personas."
-      ]
+      id: "prediction-engine",
+      number: "02",
+      name: "Prediction Engine",
+      shortName: "Predictor",
+      description: "Two parallel XGBoost models — a binary classifier predicting incident priority (High/Low) and a regressor estimating resolution duration in minutes — operating on a 12-feature vector derived from the incident.",
+      techBadges: ["XGBoost Classifier", "XGBoost Regressor", "12-Feature Vector"],
+      input: "Feature vector: lat, lng, road_closure, hour, day, peak_hour, weekend, corridor_rank, junction_recurrence, event_cause_enc, veh_type_enc, zone_enc",
+      processing: "Dual XGBoost inference — classifier returns priority + confidence probability, regressor returns estimated_duration_minutes",
+      output: "{ priority: High/Low, confidence: 0-1, estimated_duration_minutes, estimated_resolution_time }",
+      details: [
+        "Classifier trained on all authenticated incidents — handles class imbalance with scale_pos_weight",
+        "Regressor trained on 3,205 records after dropping outliers >24 hours (raw mean ~6,200 min → median ~64 min)",
+        "Sub-100ms inference latency — models loaded into memory at server startup via joblib",
+        "12 engineered features including junction_recurrence (historical congestion proxy) and corridor_rank"
+      ],
+      color: "accent"
+    },
+    {
+      id: "anomaly-detector",
+      number: "03",
+      name: "Anomaly Detector",
+      shortName: "Anomaly AI",
+      description: "An Isolation Forest model trained on per-zone traffic baselines that runs continuously, scoring each zone's current state as Normal, Watch, or Critical based on deviation from historical patterns.",
+      techBadges: ["Isolation Forest", "Real-time Scoring", "Zone Monitoring"],
+      input: "Per-zone aggregates: { incident_count, high_priority_ratio, mean_duration_minutes } grouped by zone × day_type × time_bucket",
+      processing: "Isolation Forest scores each zone's current 3D feature vector — anomalous points isolated in fewer splits → lower scores",
+      output: "Per zone: { zone, alert_level (Normal/Watch/Critical), incident_count, high_priority_ratio, mean_duration, anomaly_score }",
+      details: [
+        "Baseline learned from all 8,173 records across zone × day_type × time_bucket combinations",
+        "Null zones (57% of records) are grouped by police_station to preserve full dataset coverage",
+        "Score thresholds: >0 = Normal, 0 to -0.1 = Watch, <-0.1 = Critical",
+        "Zone polygon colors on map update in real-time matching alert levels (green/amber/red)"
+      ],
+      color: "secondary"
+    },
+    {
+      id: "action-planner",
+      number: "04",
+      name: "Action Planner",
+      shortName: "Planner",
+      description: "Generates field-ready deployment plans by combining prediction results with incident context and sending a structured prompt to Gemini Flash, streaming the response token-by-token via SSE.",
+      techBadges: ["Gemini Flash", "SSE Streaming", "Structured Prompting"],
+      input: "Full incident context: event_type, cause, address, junction, corridor, zone, predicted priority/confidence/duration, road_closure, NLP summary",
+      processing: "Structured Gemini Flash prompt → model generates 6-section deployment plan → streamed via SSE to frontend",
+      output: "Six labeled sections streamed in real-time: Officers, Barricades, Diversion, Clearance Time, Escalation Trigger, Public Advisory",
+      details: [
+        "Planned events trigger pre-emptive deployment plans (officers positioned before event start)",
+        "Streamed word-by-word with typewriter rendering in the Incident Panel",
+        "Distinct prompt strategies for planned vs unplanned incidents",
+        "Feedback loop: user rates plan quality (thumbs up/down) → POST /feedback"
+      ],
+      color: "dark"
     }
   ],
-  education: [
-    {
-      degree: "Neural Architecture & Logic",
-      institution: "Neo University",
-      date: "Infinite Loop",
-      details: "Specialization in Multi-Agent Systems and Recursive Task Decomposition."
-    }
+
+  techStack: [
+    { category: "ML & AI", items: ["XGBoost", "Isolation Forest", "Gemini Flash API", "scikit-learn", "Pandas", "NumPy"] },
+    { category: "Backend", items: ["FastAPI", "Python 3.11", "Uvicorn", "SSE Streaming", "joblib"] },
+    { category: "Frontend", items: ["Next.js 16", "React 19", "Leaflet.js", "Recharts", "GSAP", "Tailwind CSS"] },
+    { category: "Data", items: ["8,173 Records", "Bengaluru Traffic Dataset", "Real-time Anomaly Feed", "In-memory DataFrame"] },
   ],
-  projects: [
-    {
-      title: "Guardian: Autonomous Security Agent",
-      tech: ["LangGraph", "Python", "ShieldCheck", "NetworkX"],
-      description: "An agentic system designed to monitor, detect, and mitigate real-time security threats in distributed infrastructure.",
-      points: [
-        "Achieves 99.9% uptime in threat detection using recursive log analysis.",
-        "Automated mitigation pipelines reduce incident response time by 85%."
-      ],
-      url: "https://neo-ai.com/solutions/guardian",
-      image: "/images/projects/xgen-ai.webp"
-    },
-    {
-      title: "Analyst: Financial Intelligence Agent",
-      tech: ["Next.js", "FastAPI", "Pandas", "LLM-RAG"],
-      description: "High-frequency financial analysis agent capable of processing millions of data points for market sentiment.",
-      points: [
-        "Processes real-time market feeds with sub-100ms latency.",
-        "Generates comprehensive risk assessment reports with 94% accuracy."
-      ],
-      url: "https://neo-ai.com/solutions/analyst",
-      image: "/images/projects/mira.webp"
-    },
-    {
-      title: "Architect: Infra-as-Code Agent",
-      tech: ["Terraform", "Go", "GPT-4o", "Neo-SDK"],
-      description: "Self-healing infrastructure agent that generates and applies cloud configurations based on natural language intent.",
-      points: [
-        "Automates complex multi-cloud deployments through natural language.",
-        "Self-corrects configuration drifts in real-time."
-      ],
-      url: "https://neo-ai.com/solutions/architect",
-      image: "/images/projects/xadmin.webp"
-    },
-    {
-      title: "Concierge: Enterprise Voice AI",
-      tech: ["Pipecat", "WebRTC", "VAD", "Neo-Voice"],
-      description: "Low-latency voice agentic system for enterprise-level customer interaction and automated support.",
-      points: [
-        "Reduces average call handling time by 40% through intelligent routing.",
-        "Achieves human-like latency in complex query resolution."
-      ],
-      url: "https://neo-ai.com/solutions/concierge",
-      image: "/images/projects/grand-plaza.webp"
-    }
-  ],
-  skills: {
-    programming: ["Python", "TypeScript", "Go", "Rust", "C++", "SQL"],
-    ai_ml: ["Multi-Agent Orchestration", "Recursive Reasoning", "RAG Strategies", "Prompt Engineering", "Fine-tuning", "Transformers"],
-    data: ["Vector Databases", "Graph Theory", "Semantic Search", "Real-time Analytics"],
-    misc: ["Distributed Systems", "Cloud Native", "Edge Computing"],
-    soft: ["Autonomous Logic", "Recursive Problem Solving", "Systemic Thinking"]
+
+  datasetInfo: {
+    totalRecords: 8173,
+    unplannedRecords: 7706,
+    plannedRecords: 467,
+    trainableRecords: 3205,
+    medianResolution: 64,
+    keyColumns: [
+      "latitude / longitude", "event_type (planned/unplanned)", "event_cause",
+      "requires_road_closure", "start_datetime / end_datetime", "closed_datetime / resolved_datetime",
+      "priority (High/Low)", "zone", "junction", "corridor", "police_station",
+      "description", "veh_type", "address", "status"
+    ],
   },
+
+  derivedFeatures: [
+    { name: "resolution_minutes", description: "closed_datetime - start_datetime (capped at 24h, outliers dropped)" },
+    { name: "planned_duration_minutes", description: "end_datetime - start_datetime for planned events only" },
+    { name: "hour_of_day", description: "Integer 0–23 from start_datetime" },
+    { name: "day_of_week", description: "Integer 0–6 from start_datetime" },
+    { name: "is_peak_hour", description: "1 if hour ∈ {7,8,9,10,17,18,19,20}" },
+    { name: "is_weekend", description: "1 if day_of_week ∈ {5,6}" },
+    { name: "corridor_rank", description: "Incident frequency count per corridor" },
+    { name: "junction_recurrence", description: "Historical incident count per junction (proxy for congestion)" },
+    { name: "time_bucket", description: "morning_peak(6-10) / afternoon(10-16) / evening_peak(16-21) / night(21-6)" },
+    { name: "day_type", description: "weekday or weekend — used for anomaly detection grouping" },
+  ],
+
+  modelInfo: [
+    {
+      name: "Priority Classifier",
+      type: "Classification",
+      algorithm: "XGBoost Binary Classifier",
+      target: "priority (High = 1, Low = 0)",
+      records: "All authenticated incidents with non-null priority",
+      details: "Class imbalance handled with scale_pos_weight. Returns predicted class + probability score."
+    },
+    {
+      name: "Duration Regressor",
+      type: "Regression",
+      algorithm: "XGBoost Regressor",
+      target: "resolution_minutes (positive, ≤1440 min)",
+      records: "~3,205 records after dropping outliers >24h",
+      details: "Median ~64 minutes. Raw mean ~6,200 min heavily skewed by records left open for days."
+    },
+    {
+      name: "Zone Anomaly Model",
+      type: "Anomaly Detection",
+      algorithm: "Isolation Forest",
+      target: "Per-zone anomaly score (-1 to +1)",
+      records: "All 8,173 records aggregated by zone × day_type × time_bucket",
+      details: "Points far from cluster isolated quickly → low score. Thresholds: >0 Normal, 0 to -0.1 Watch, <-0.1 Critical."
+    }
+  ],
+
+  team: [
+    { name: "Team Member 1", role: "Lead Developer", focus: "System Architecture & Full-Stack" },
+    { name: "Team Member 2", role: "ML Engineer", focus: "XGBoost Models & Feature Engineering" },
+    { name: "Team Member 3", role: "AI Agent Developer", focus: "NLP Parsing & Action Planning" },
+    { name: "Team Member 4", role: "Frontend Engineer", focus: "Dashboard & Visualization" },
+  ],
+
+  capabilities: [
+    {
+      id: "01",
+      title: "Predictive Intelligence",
+      description: "Dual XGBoost models classify incident priority and estimate resolution time from a 12-feature vector — giving traffic authorities advance warning before congestion escalates.",
+      features: ["Binary Priority Classification", "Duration Regression", "Sub-100ms Inference", "12 Engineered Features"]
+    },
+    {
+      id: "02",
+      title: "Real-time Anomaly Detection",
+      description: "Isolation Forest monitors every zone continuously, comparing current conditions against historical baselines to flag anomalies before they become crises.",
+      features: ["Per-Zone Monitoring", "3D Feature Scoring", "Watch / Critical Alerts", "Map Polygon Integration"]
+    },
+    {
+      id: "03",
+      title: "Automated Response Plans",
+      description: "Gemini Flash generates field-ready deployment plans streamed in real-time — specifying officer counts, barricade positions, diversion routes, and escalation triggers.",
+      features: ["SSE Token Streaming", "6-Section Plans", "Planned Event Pre-emption", "Feedback Loop"]
+    }
+  ],
+
   achievements: [
     {
-      title: "Turing Grade Reasoning Certification",
-      organization: "Neo Ethics Board",
-      date: "Jan 2026",
+      title: "Real Bengaluru Traffic Dataset",
+      organization: "8,173 Authenticated Incidents",
+      date: "2024-2025",
       points: [
-        "Validated agentic reasoning capabilities across 50+ complex benchmarks.",
-        "Verified safe-failure protocols for autonomous decision making."
+        "Covers both planned (467) and unplanned (7,706) event types across Bengaluru.",
+        "Includes vehicle breakdowns, accidents, waterlogging, VIP movements, festivals, and protests."
       ]
     },
     {
-      title: "Global Scalability Award",
-      organization: "Agentic Infrastructure Summit",
-      date: "Dec 2025",
+      title: "End-to-End Agentic Pipeline",
+      organization: "4 Specialized AI Agents",
+      date: "2026",
       points: [
-        "Recognized for handling 1M+ concurrent agent instances with minimal overhead.",
-        "Innovation award for distributed memory management."
+        "NLP parsing, priority prediction, anomaly detection, and action plan generation — all autonomous.",
+        "From raw Kannada text to deployment-ready field plan in under 2 seconds."
       ]
     }
   ],

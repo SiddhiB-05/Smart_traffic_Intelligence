@@ -1,153 +1,180 @@
 'use client';
 
-import { DATA } from "@/components/constants";
-import { User, Envelope as Mail, Stack as Layers, Globe, ArrowUpRight, RocketLaunch as Rocket, Terminal, ShieldCheck } from '@phosphor-icons/react';
-import Link from "next/link";
-import { motion } from '@/components/motion-client';
+import { TreeStructure, Cpu, ShieldCheck, Database, MagnifyingGlass, Lightning as Zap, Broadcast, MapPin, ChartLineUp, TerminalWindow, Crosshair, ArrowRight } from '@phosphor-icons/react';
+import Link from 'next/link';
+import { DATA } from '@/components/constants';
+import { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-export default function AboutPage() {
-    const { summary } = DATA;
+gsap.registerPlugin(ScrollTrigger);
+
+export default function ArchitecturePage() {
+    const headerRef = useRef<HTMLDivElement>(null);
+    const diagramRef = useRef<HTMLDivElement>(null);
+    const gridRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const ctx = gsap.context(() => {
+            // Header animation
+            gsap.from(headerRef.current, {
+                y: 40,
+                opacity: 0,
+                duration: 0.8,
+                ease: 'power3.out',
+            });
+
+            // Diagram boxes and lines
+            const tl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: diagramRef.current,
+                    start: 'top 80%',
+                }
+            });
+
+            tl.from('.diag-box', {
+                y: 30,
+                opacity: 0,
+                stagger: 0.2,
+                duration: 0.6,
+                ease: 'power2.out',
+            })
+            .from('.diag-line', {
+                scaleX: 0,
+                transformOrigin: 'left',
+                stagger: 0.1,
+                duration: 0.4,
+                ease: 'power1.inOut',
+            }, '-=0.4');
+
+            // Capabilities Grid
+            gsap.from('.cap-card', {
+                scrollTrigger: {
+                    trigger: gridRef.current,
+                    start: 'top 80%',
+                },
+                y: 40,
+                opacity: 0,
+                stagger: 0.15,
+                duration: 0.6,
+                ease: 'power2.out',
+            });
+        });
+
+        return () => ctx.revert();
+    }, []);
 
     return (
-        <div className="flex-1 w-full bg-grid">
-            <div className="max-w-7xl mx-auto w-full px-4 md:px-6 py-8 md:py-16 pb-32">
-                <main className="w-full flex flex-col gap-12">
-                    
-                    {/* Consistent Header Style */}
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        whileInView={{ opacity: 1 }}
-                        viewport={{ once: true, amount: 0.5 }}
-                        className="flex flex-col lg:flex-row gap-8 lg:items-end justify-between mb-8"
-                    >
-
-                            <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-[0.85]">
-                                The <span className="text-primary terminal-invert inline-block relative px-2">Vision</span>
-                            </h1>
-
-
-                    </motion.div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-                        {/* Bio Section */}
-                        <motion.section 
-                            initial={{ opacity: 0 }}
-                            whileInView={{ opacity: 1 }}
-                            viewport={{ once: true, amount: 0.5 }}
-                            transition={{ delay: 0.1 }}
-                            className="col-span-12 lg:col-span-8 neo-brutal-box border-neo-border bg-white p-6 md:p-12 shadow-neo relative overflow-hidden"
-                        >
-                            <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
-                                <Rocket weight="bold" className="w-32 h-32" />
-                            </div>
-                            <div className="relative z-10">
-                                <div className="inline-block px-3 py-1 bg-primary border-2 border-black font-mono text-xs mb-6 uppercase tracking-widest font-bold shadow-neo-sm">
-                                    Status: Operational
-                                </div>
-                                <div className="prose prose-lg max-w-none">
-                                    <p className="font-mono text-lg md:text-2xl leading-relaxed mb-8 border-l-4 border-black pl-6 bg-secondary p-6">
-                                        Neo is designed to handle complex systemic problems predictably and autonomously. We focus on the intersection of long-context reasoning and real-time execution.
-                                    </p>
-                                    <p className="font-display font-medium text-lg text-gray-800 mb-6 whitespace-pre-wrap leading-relaxed">
-                                        {summary}
-                                    </p>
-                                    <p className="font-display text-gray-600">
-                                        Our architecture leverages distributed nodes and recursive feedback loops to ensure that agents don&apos;t just follow instructions—they reason through them.
-                                    </p>
-                                </div>
-                            </div>
-                        </motion.section>
-
-                        {/* Sidebar / Stats Card */}
-                        <motion.section 
-                            initial={{ opacity: 0 }}
-                            whileInView={{ opacity: 1 }}
-                            viewport={{ once: true, amount: 0.5 }}
-                            transition={{ delay: 0.2 }}
-                            className="col-span-12 lg:col-span-4 flex flex-col gap-6"
-                        >
-                            <div className="neo-brutal-box border-neo-border bg-secondary p-8 shadow-neo flex-1">
-                                <div className="flex items-center gap-4 mb-8">
-                                    <Terminal weight="bold" className="w-10 h-10 bg-black text-white p-2 border-2 border-black" />
-                                    <h2 className="text-2xl font-black uppercase tracking-tight">System Core</h2>
-                                </div>
-                                <div className="space-y-6">
-                                    <div className="p-4 border-2 border-black bg-white shadow-neo-sm">
-                                        <p className="font-mono text-[10px] uppercase text-gray-500 mb-1">Architecture</p>
-                                        <p className="font-bold text-lg">Agentic-First</p>
-                                    </div>
-                                    <div className="p-4 border-2 border-black bg-white shadow-neo-sm">
-                                        <p className="font-mono text-[10px] uppercase text-gray-500 mb-1">Deployment</p>
-                                        <p className="font-bold text-lg">Global Node Network</p>
-                                    </div>
-                                    <div className="p-4 border-2 border-black bg-white shadow-neo-sm">
-                                        <p className="font-mono text-[10px] uppercase text-gray-500 mb-1">Reasoning</p>
-                                        <p className="font-bold text-lg">Recursive Chains</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.section>
-
-                        {/* Capabilities */}
-                        <section className="col-span-12 flex flex-col gap-6" id="stack">
-                            <div className="flex items-center gap-4">
-                                <div className="h-10 w-10 bg-black flex items-center justify-center text-white border-2 border-black">
-                                    <Layers weight="bold" className="w-6 h-6" />
-                                </div>
-                                <h2 className="text-3xl font-black uppercase tracking-tight">Core Capabilities</h2>
-                                <div className="h-1 flex-1 bg-black"></div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {[
-                                    { id: '01', title: 'Orchestration', desc: 'Autonomous systems configured for high-concurrency outputs.', features: ['Recursive Reasoning', 'Dynamic Task Routing', 'Multi-Agent Sync'] },
-                                    { id: '02', title: 'Intelligence', desc: 'End-to-end cognitive workflows for enterprise data.', features: ['Sub-second RAG', 'Specialized LLMs', 'Context Memory'] },
-                                    { id: '03', title: 'Resilience', desc: 'Self-healing infrastructure and secure execution layers.', features: ['Auth_Secure Layer', 'Config Drift Correction', 'Distributed Nodes'] }
-                                ].map((area, index) => (
-                                    <motion.div 
-                                        key={area.id} 
-                                        initial={{ opacity: 0 }}
-                                        whileInView={{ opacity: 1 }}
-                                        viewport={{ once: true, amount: 0.5 }}
-                                        transition={{ delay: 0.1 * index }}
-                                        className="neo-brutal-box border-neo-border bg-white p-8 shadow-neo hover:bg-secondary transition-colors group"
-                                    >
-                                        <h4 className="font-mono font-black text-black bg-primary inline-block px-3 py-1 border-2 border-black mb-6 shadow-neo-sm">{area.id}.</h4>
-                                        <h3 className="text-2xl font-black uppercase mb-4 group-hover:text-primary transition-colors">{area.title}</h3>
-                                        <p className="text-sm font-bold text-gray-600 mb-6 leading-relaxed">{area.desc}</p>
-                                        <ul className="text-xs font-mono space-y-2 border-t-2 border-gray-100 pt-4">
-                                            {area.features.map(f => (
-                                                <li key={f} className="flex items-center gap-2">
-                                                    <span className="text-primary font-bold">▶</span> {f}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        </section>
-
-                        {/* CTA */}
-                        <motion.section 
-                            initial={{ opacity: 0 }}
-                            whileInView={{ opacity: 1 }}
-                            viewport={{ once: true, amount: 0.5 }}
-                            className="col-span-12 mt-8 bg-primary border-3 border-neo-border p-12 text-center shadow-neo relative overflow-hidden"
-                        >
-                            <div className="absolute inset-0 pattern-diagonal opacity-10 pointer-events-none"></div>
-                            <div className="relative z-10">
-                                <h2 className="text-4xl md:text-5xl font-black uppercase mb-6 tracking-tighter">Ready to Deploy?</h2>
-                                <p className="font-mono text-lg font-bold mb-10 max-w-2xl mx-auto uppercase tracking-tight">We are currently onboarding select partners for the Neo Alpha program. Secure your node today.</p>
-                                <Link
-                                    href="/contact"
-                                    className="inline-block bg-black text-white px-10 py-5 font-black text-xl uppercase tracking-widest hover:bg-white hover:text-black border-3 border-black transition-all shadow-neo hover:shadow-none translate-x-[-4px] translate-y-[-4px] hover:translate-x-0 hover:translate-y-0"
-                                >
-                                    Initiate Onboarding
-                                </Link>
-                            </div>
-                        </motion.section>
+        <div className="flex-1 w-full bg-grid pb-20">
+            {/* Header */}
+            <section ref={headerRef} className="max-w-7xl mx-auto px-4 md:px-6 pt-12 pb-8">
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="h-10 w-10 bg-neo-text flex items-center justify-center text-primary shadow-neo-sm">
+                        <TreeStructure weight="bold" className="w-6 h-6" />
                     </div>
-                </main>
-            </div>
+                    <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tight">System Architecture</h1>
+                </div>
+                <p className="text-xl font-mono text-gray-600 max-w-3xl border-l-4 border-primary pl-4">
+                    How Smart Traffic Intelligence orchestrates data, predictive models, and autonomous agents to manage Bengaluru traffic.
+                </p>
+            </section>
+
+            {/* Core Architecture Diagram */}
+            <section className="max-w-7xl mx-auto px-4 md:px-6 mb-16">
+                <div ref={diagramRef} className="border-4 border-neo-border bg-white p-6 md:p-12 shadow-neo relative overflow-hidden">
+                    <div className="absolute inset-0 pattern-diagonal opacity-5 pointer-events-none"></div>
+
+                    <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-4">
+
+                        {/* Block 1: Input Data */}
+                        <div className="diag-box w-full lg:w-1/4 border-3 border-neo-border bg-secondary p-6 text-center hover:bg-primary transition-colors">
+                            <Database weight="bold" className="w-12 h-12 mx-auto mb-4 text-neo-text" />
+                            <h3 className="font-black uppercase tracking-tight text-lg mb-2">Bengaluru Dataset</h3>
+                            <p className="font-mono text-xs text-gray-700">8,173 Historical Incidents<br />+ Live Feed</p>
+                        </div>
+
+                        {/* Arrow */}
+                        <div className="diag-line hidden lg:block w-12 h-2 bg-neo-text relative agent-pulse"></div>
+                        <div className="diag-line lg:hidden h-8 w-2 bg-neo-text relative agent-pulse"></div>
+
+                        {/* Block 2: Agent Orchestrator */}
+                        <div className="diag-box w-full lg:w-1/3 border-4 border-neo-border bg-neo-text p-6 text-center text-white relative shadow-[6px_6px_0px_0px_#9FE870]">
+                            <Cpu weight="bold" className="w-16 h-16 mx-auto mb-4 text-primary" />
+                            <h3 className="font-black uppercase tracking-tight text-xl mb-4 text-primary">AI Orchestrator</h3>
+                            <div className="grid grid-cols-2 gap-2 text-left">
+                                <div className="border border-gray-600 bg-black/50 p-2 font-mono text-[10px] text-gray-300">1. NLP Parser</div>
+                                <div className="border border-gray-600 bg-black/50 p-2 font-mono text-[10px] text-gray-300">2. Predictor</div>
+                                <div className="border border-gray-600 bg-black/50 p-2 font-mono text-[10px] text-gray-300">3. Anomaly AI</div>
+                                <div className="border border-gray-600 bg-black/50 p-2 font-mono text-[10px] text-gray-300">4. Action Planner</div>
+                            </div>
+                        </div>
+
+                        {/* Arrow */}
+                        <div className="diag-line hidden lg:block w-12 h-2 bg-neo-text relative agent-pulse-delay-1"></div>
+                        <div className="diag-line lg:hidden h-8 w-2 bg-neo-text relative agent-pulse-delay-1"></div>
+
+                        {/* Block 3: Actionable Output */}
+                        <div className="diag-box w-full lg:w-1/4 border-3 border-neo-border bg-white p-6 text-center hover:bg-gray-50 transition-colors">
+                            <TerminalWindow weight="bold" className="w-12 h-12 mx-auto mb-4 text-neo-text" />
+                            <h3 className="font-black uppercase tracking-tight text-lg mb-2">Live Dashboard</h3>
+                            <p className="font-mono text-xs text-gray-600">Map • Alerts • Deployment Plans</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Core Capabilities Detailed */}
+            <section ref={gridRef} className="max-w-7xl mx-auto px-4 md:px-6">
+                <div className="flex items-center gap-4 mb-8">
+                    <Crosshair weight="bold" className="w-8 h-8 text-primary bg-neo-text p-1" />
+                    <h2 className="text-2xl font-black uppercase tracking-tight">Core Capabilities</h2>
+                    <div className="h-1 flex-1 bg-neo-text opacity-20"></div>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-6">
+                    {DATA.capabilities.map((cap, idx) => (
+                        <div key={idx} className="cap-card border-3 border-neo-border bg-white shadow-neo flex flex-col group hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
+                            {/* Card Header */}
+                            <div className="bg-neo-text text-white p-4 border-b-3 border-neo-border flex justify-between items-center">
+                                <span className="font-mono text-xs font-bold text-primary bg-white/10 px-2 py-1">SYS_{cap.id}</span>
+                                {idx === 0 && <MagnifyingGlass weight="bold" className="w-6 h-6 text-primary" />}
+                                {idx === 1 && <Broadcast weight="bold" className="w-6 h-6 text-primary" />}
+                                {idx === 2 && <ShieldCheck weight="bold" className="w-6 h-6 text-primary" />}
+                            </div>
+
+                            {/* Card Body */}
+                            <div className="p-6 flex-1 flex flex-col">
+                                <h3 className="text-xl font-black uppercase tracking-tight mb-3">{cap.title}</h3>
+                                <p className="font-mono text-sm text-gray-600 mb-6 flex-1">{cap.description}</p>
+
+                                <div className="space-y-2 mb-6">
+                                    {cap.features.map((feature, fIdx) => (
+                                        <div key={fIdx} className="flex items-start gap-2 font-mono text-xs font-bold">
+                                            <Zap weight="fill" className="w-4 h-4 text-primary shrink-0" />
+                                            <span>{feature}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* Bottom CTA */}
+            <section className="max-w-7xl mx-auto px-4 md:px-6 mt-16">
+                <Link href="/dashboard" className="block w-full border-4 border-neo-border bg-primary p-8 shadow-neo group hover:bg-neo-text hover:text-white transition-colors duration-300">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div>
+                            <h2 className="text-3xl font-black uppercase tracking-tight mb-2 group-hover:text-primary">Experience the Architecture</h2>
+                            <p className="font-mono text-sm group-hover:text-gray-300">See the predictive models and NLP parser in action.</p>
+                        </div>
+                        <div className="w-16 h-16 bg-white border-3 border-neo-border text-neo-text flex items-center justify-center group-hover:bg-primary transition-colors">
+                            <ArrowRight weight="bold" className="w-8 h-8" />
+                        </div>
+                    </div>
+                </Link>
+            </section>
         </div>
     );
 }

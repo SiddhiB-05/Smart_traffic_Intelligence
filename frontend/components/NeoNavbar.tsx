@@ -37,15 +37,15 @@ export default function NeoNavbar() {
                     <div className="hidden min-[780px]:flex items-center gap-4 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
                         <Link href="/" className="group cursor-pointer">
                             <div className="w-16 h-10 border-3 border-neo-border bg-primary flex items-center justify-center shadow-[4px_4px_0px_0px_var(--neo-shadow)] group-hover:translate-x-[4px] group-hover:translate-y-[4px] group-hover:shadow-none transition-all duration-200">
-                                <span className="font-mono font-bold text-xl text-neo-text uppercase">NEO</span>
+                                <span className="font-mono font-bold text-xl text-neo-text uppercase">STI</span>
                             </div>
                         </Link>
                         {[
-                            { href: '/about', label: 'About' },
-                            { href: '/projects', label: 'Works' },
+                            { href: '/about', label: 'Architecture' },
+                            { href: '/projects', label: 'Agents' },
                             { href: '/dashboard', label: 'Dashboard' },
-                            { href: '/journey', label: 'Journey' },
-                            { href: '/contact', label: 'Contact' },
+                            { href: '/journey', label: 'Pipeline' },
+                            { href: '/contact', label: 'Team' },
                         ].map((link, idx) => (
                             <Link
                                 key={idx}
@@ -68,12 +68,12 @@ export default function NeoNavbar() {
             {isMenuOpen && (
                 <div className="min-[780px]:hidden absolute top-full left-0 w-full h-[calc(100vh-67px)] md:h-[calc(100vh-83px)] bg-neo-bg bg-grid p-8 flex flex-col gap-5 overflow-y-auto z-40 border-t-3 border-neo-border">
                     {[
-                        { href: '/', label: 'Neo' },
-                        { href: '/about', label: 'About' },
-                        { href: '/projects', label: 'Works' },
+                        { href: '/', label: 'Home' },
+                        { href: '/about', label: 'Architecture' },
+                        { href: '/projects', label: 'Agents' },
                         { href: '/dashboard', label: 'Dashboard' },
-                        { href: '/journey', label: 'Journey' },
-                        { href: '/contact', label: 'Contact' },
+                        { href: '/journey', label: 'Pipeline' },
+                        { href: '/contact', label: 'Team' },
                     ].map((link, idx) => (
                         <Link
                             key={idx}

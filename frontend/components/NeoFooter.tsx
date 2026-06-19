@@ -2,18 +2,18 @@
 
 import React from 'react';
 
-// AI Agent themed ticker facts
+// Smart Traffic Intelligence ticker facts
 const TICKER_FACTS = [
-    "NEO // AUTONOMOUS AGENT",
-    "SYSTEM STATUS: OPERATIONAL",
-    "NEURAL CORE V2.4.0",
-    "ACTIVE HEURISTICS: ENABLED",
-    "COGNITIVE OVERLAY ACTIVE",
-    "DATA PROCESSING AT SCALE",
-    "BEYOND LLM LIMITATIONS",
-    "AGENTIC REASONING ENGINE",
-    "NEO IS WATCHING",
-    "∞ INTELLIGENCE",
+    "SMART TRAFFIC INTELLIGENCE // BENGALURU",
+    "4 AUTONOMOUS AI AGENTS",
+    "8,173 REAL INCIDENTS ANALYZED",
+    "XGBOOST CLASSIFICATION ENGINE",
+    "ISOLATION FOREST ANOMALY DETECTION",
+    "GEMINI FLASH NLP PARSING",
+    "REAL-TIME ZONE MONITORING",
+    "SSE-STREAMED ACTION PLANS",
+    "MULTILINGUAL INCIDENT PARSING",
+    "PREDICTIVE TRAFFIC MANAGEMENT",
 ];
 
 export default function NeoFooter() {
@@ -39,10 +39,10 @@ export default function NeoFooter() {
             <div className="max-w-7xl mx-auto px-6 pb-12 pt-6">
                 <div className="mt-12 pt-8 border-t-3 border-neo-border flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="font-mono text-xs font-bold uppercase tracking-tighter">
-                        © {currentYear} NEO COGNITIVE SYSTEMS // ALL RIGHTS RESERVED
+                        © {currentYear} SMART TRAFFIC INTELLIGENCE // ALL RIGHTS RESERVED
                     </div>
                     <div className="flex items-center gap-4 font-mono text-[10px] font-bold text-neo-text/60 uppercase">
-                        <span>Built by humans. Guided by Neo.</span>
+                        <span>Agentic AI for Bengaluru Traffic</span>
                         <div className="flex gap-1">
                             <div className="w-2 h-2 bg-primary animate-pulse" />
                             <div className="w-2 h-2 bg-black animate-pulse delay-75" />

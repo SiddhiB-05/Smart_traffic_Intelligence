@@ -2,7 +2,6 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Space_Grotesk, Space_Mono } from "next/font/google";
 import ClientLayout from "../components/ClientLayout";
-import { DATA } from "@/components/constants";
 
 // Font for headings
 const spaceGrotesk = Space_Grotesk({
@@ -21,10 +20,10 @@ const spaceMono = Space_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "NEO // SYSTEM",
-    template: "%s // NEO",
+    default: "Smart Traffic Intelligence // Bengaluru",
+    template: "%s // Smart Traffic Intelligence",
   },
-  description: "Autonomous Agentic Infrastructure",
+  description: "Agentic AI platform for predictive traffic management in Bengaluru — 4 autonomous agents analyzing 8,173 real incidents for priority classification, anomaly detection, and automated response planning.",
   icons: {
     icon: "/favicon.ico",
   },

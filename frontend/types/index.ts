@@ -2,17 +2,22 @@
 
 export interface SystemData {
   name: string;
+  tagline: string;
   contact: {
     email: string;
     portfolio: string;
     links: SocialLink[];
   };
   summary: string;
-  workExperience: WorkExperience[];
-  education: Education[];
-  projects: Project[];
-  skills: Skills;
+  systemStats: SystemStat[];
+  agents: AgentDefinition[];
+  techStack: TechCategory[];
+  datasetInfo: DatasetInfo;
+  derivedFeatures: DerivedFeature[];
+  modelInfo: ModelInfo[];
+  team: TeamMember[];
   achievements: Achievement[];
+  capabilities: Capability[];
 }
 
 export interface SocialLink {
@@ -21,6 +26,75 @@ export interface SocialLink {
   icon: React.ComponentType<{ className?: string; weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone"; size?: number | string }>;
 }
 
+export interface SystemStat {
+  label: string;
+  value: string;
+  description: string;
+}
+
+export interface AgentDefinition {
+  id: string;
+  number: string;
+  name: string;
+  shortName: string;
+  description: string;
+  techBadges: string[];
+  input: string;
+  processing: string;
+  output: string;
+  details: string[];
+  color: 'primary' | 'accent' | 'secondary' | 'dark';
+}
+
+export interface TechCategory {
+  category: string;
+  items: string[];
+}
+
+export interface DatasetInfo {
+  totalRecords: number;
+  unplannedRecords: number;
+  plannedRecords: number;
+  trainableRecords: number;
+  medianResolution: number;
+  keyColumns: string[];
+}
+
+export interface DerivedFeature {
+  name: string;
+  description: string;
+}
+
+export interface ModelInfo {
+  name: string;
+  type: string;
+  algorithm: string;
+  target: string;
+  records: string;
+  details: string;
+}
+
+export interface TeamMember {
+  name: string;
+  role: string;
+  focus: string;
+}
+
+export interface Capability {
+  id: string;
+  title: string;
+  description: string;
+  features: string[];
+}
+
+export interface Achievement {
+  title: string;
+  organization: string;
+  date: string;
+  points: string[];
+}
+
+// Re-export old types for backward compatibility
 export interface WorkExperience {
   title: string;
   company: string;
@@ -52,11 +126,4 @@ export interface Skills {
   data: string[];
   misc: string[];
   soft: string[];
-}
-
-export interface Achievement {
-  title: string;
-  organization: string;
-  date: string;
-  points: string[];
 }

@@ -35,15 +35,15 @@ Rules:
 2. If the input is vague or could refer to multiple places (e.g. "near the big mall"), return 2 to 3 distinct candidate locations.
 3. CRITICAL: Keep the resolved name as short and canonical as possible. Do NOT append specific neighborhoods, sectors, or localities unless the user explicitly typed them. (e.g. if the user says "phoenix mall", return "Phoenix Marketcity", DO NOT return "Phoenix Marketcity, Whitefield").
 4. ALWAYS append the correct city and state to the resolved name (e.g. ", Bengaluru, Karnataka" or ", Mangaluru, Karnataka"). This is critical for the map API to find it.
-5. Return dummy values for lat and lng (like 12.0 and 77.0), we will fetch the real coordinates from a map API later. Your only job is to provide the correct "resolved_name" or candidate "name"s.
+5. Provide approximate latitude and longitude coordinates for the location in Bengaluru (e.g., lat around 12.97, lng around 77.59). Make your best guess based on the area. This will be used as a fallback if the map API fails.
 
 RESPONSE FORMAT — return ONLY valid JSON, no markdown, no explanation:
 
 For a specific, unambiguous location:
-{"confidence": "high", "lat": 12.0, "lng": 77.0, "resolved_name": "<canonical name, city, state>"}
+{"confidence": "high", "lat": 12.93, "lng": 77.62, "resolved_name": "<canonical name, city, state>"}
 
 For an ambiguous or vague input:
-{"confidence": "ambiguous", "candidates": [{"name": "<place name, city, state>", "lat": 12.0, "lng": 77.0}, ...]}
+{"confidence": "ambiguous", "candidates": [{"name": "<place name, city, state>", "lat": 12.93, "lng": 77.62}, ...]}
 
 If the location cannot be parsed at all:
 {"confidence": "failed", "message": "<brief reason>"}
@@ -148,6 +148,11 @@ def _hybrid_geocode(zone_input: str) -> Optional[Dict[str, Any]]:
         if coords:
             return {"confidence": "high", "lat": coords[0], "lng": coords[1], "resolved_name": name}
         else:
+            lat = parsed.get("lat")
+            lng = parsed.get("lng")
+            if lat and lng and _validate_bengaluru_coords(lat, lng):
+                logger.warning("Nominatim failed. Falling back to LLM approximate coordinates.")
+                return {"confidence": "high", "lat": lat, "lng": lng, "resolved_name": name}
             return {"confidence": "failed", "message": f"Could not map coordinates for '{name}'."}
             
     elif confidence == "ambiguous":
@@ -160,6 +165,11 @@ def _hybrid_geocode(zone_input: str) -> Optional[Dict[str, Any]]:
             coords = _fetch_coordinates(name)
             if coords:
                 valid.append({"name": name, "lat": coords[0], "lng": coords[1]})
+            else:
+                lat = c.get("lat")
+                lng = c.get("lng")
+                if lat and lng and _validate_bengaluru_coords(lat, lng):
+                    valid.append({"name": name, "lat": lat, "lng": lng})
             # Respect OpenStreetMap's 1 req/sec strict limit
             time.sleep(1.1)
         

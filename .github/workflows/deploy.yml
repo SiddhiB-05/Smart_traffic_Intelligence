@@ -15,7 +15,7 @@ env:
   PYTHON_VERSION: '3.11'
   NODE_VERSION: '20'
   REGISTRY: ghcr.io
-  IMAGE_NAME: yashpitrod/smart_traffic_intelligence_new/sti-backend
+  IMAGE_NAME: ${{ github.repository }}/sti-backend
 
 permissions:
   contents: read
@@ -91,11 +91,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Convert IMAGE_NAME to lowercase
+        run: |
+          echo "IMAGE_NAME_LC=${IMAGE_NAME,,}" >> $GITHUB_ENV
+
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}
           tags: |
             type=sha,prefix=
             type=raw,value=latest

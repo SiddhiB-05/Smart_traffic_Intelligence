@@ -25,6 +25,8 @@ __pycache__/
 
 # testing
 coverage/
+.coverage
+htmlcov/
 
 # next.js
 .next/
